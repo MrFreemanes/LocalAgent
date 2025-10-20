@@ -7,10 +7,7 @@ from data.db.base_db import BaseDB
 
 class FileDB(BaseDB):
     def connect(self):
-        os.makedirs(self._path_db, exist_ok=True)
-
-        db_path = os.path.join(self._path_db, "files.db")
-        self._conn = sqlite3.connect(db_path)
+        self._conn = sqlite3.connect(f"{self._path_db}/files.db")
         self._conn.row_factory = sqlite3.Row
 
         self._create_tables()
