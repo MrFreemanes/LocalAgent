@@ -21,7 +21,7 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
         if task == 'initialize':
             db = initialize(item['new_path'])
         elif task == 'scanning':
-            scanning(item['new_path'], db, result_q)
+            scanning(r'C:\Users\notebook\Desktop\test_LocalAgent', db, result_q)
 
 
 def scanning(new_path: str, files_db, result_q):
