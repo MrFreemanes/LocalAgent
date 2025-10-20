@@ -1,6 +1,3 @@
-"""
-В воркере провожу инициализацию баз данных и уже там оперирую ими.
-"""
 import os
 
 from data.db import files_db, vector_db
