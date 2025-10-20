@@ -1,8 +1,9 @@
 import multiprocessing as mp
-import time
-from functools import lru_cache
 
 from config.config import Status
+from utils.agent_init import initialize
+from core.scanning.windows_scan import WindowsScanner
+
 
 def worker(task_q: mp.Queue, result_q: mp.Queue):
     """
@@ -10,24 +11,20 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
     :param task_q: Очередь с задачами
     :param result_q: Очередь с результатами
     """
+    db = initialize(r'C:\Users\notebook\Desktop\test_LocalAgent')
     while True:
         item = task_q.get()
 
         if item is None: break
 
-        check_list = {1, 2}
+        task = item['task']
+        if task == 'initialize':
+            db = initialize(item['new_path'])
+        elif task == 'scanning':
+            scanning(item['new_path'], db, result_q)
 
-        @lru_cache(maxsize=32)
-        def calc(num):
-            if num in (1, 2):
-                return 1
-            res = calc(num - 1) + calc(num - 2)
-            if num not in check_list:
-                result_q.put({'status': Status.RUN, 'progress': int(num / item * 100), 'data': (num, res)})
-                check_list.add(num)
-                time.sleep(0.05) # видимость нагрузки
-            return res
 
-        result = calc(item)
-
-        result_q.put({'status': Status.DONE, 'data': (item, result)})
+def scanning(new_path: str, files_db, result_q):
+    scan = WindowsScanner(new_path, files_db)
+    for progress in scan.scan():
+        result_q.put({'status': Status.RUN, 'progress': progress})

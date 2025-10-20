@@ -25,8 +25,22 @@ class WindowsScanner(BaseScanner):
                 last_progress = progress
 
     def _collect_files(self, vault: Path) -> list[Path]:
-        """Собирает все файлы для сканирования."""
-        return [f for f in vault.rglob("*.*") if f.is_file()]
+        """Собирает все файлы, игнорируя служебные директории."""
+        ignore_dirs = {"LocalAgent"}  # можно потом вынести в config.json
+
+        files = []
+        for f in vault.rglob("*.*"):
+            if not f.is_file():
+                continue
+
+            # Пропускаем файлы внутри служебных директорий
+            if any(ignored in f.parts for ignored in ignore_dirs):
+                continue
+
+            files.append(f)
+
+        return files
+
 
     def _process_file(self, vault: Path, file: Path) -> None:
         """Обрабатывает один файл — проверяет хэш и обновляет БД."""
