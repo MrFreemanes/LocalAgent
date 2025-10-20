@@ -1,6 +1,5 @@
 from utils.paths import path_to_log
 
-
 cfg = {
     'version': 1,
     'formatters': {
@@ -54,6 +53,15 @@ cfg = {
             'maxBytes': 1 * 1024 * 1024,
             'backupCount': 3,
             'encoding': 'utf-8'
+        },
+        'file_db': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'DEBUG',
+            'filename': path_to_log("db.log"),
+            'formatter': 'file_msg',
+            'maxBytes': 1 * 1024 * 1024,
+            'backupCount': 2,
+            'encoding': 'utf-8'
         }
     },
     'loggers': {
@@ -75,6 +83,11 @@ cfg = {
         'log_worker': {
             'level': 'DEBUG',
             'handlers': ['console', 'file_worker'],
+            'propagate': False
+        },
+        'log_db': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file_db'],
             'propagate': False
         }
     }
