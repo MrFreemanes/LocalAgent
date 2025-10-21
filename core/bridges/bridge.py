@@ -22,7 +22,7 @@ class Bridge(BaseBridge):
             self.done_signal.emit(result)
             self.logger.debug('Получен конечный результат: %s', result.__repr__())
         elif stat == Status.ERROR:
-            self.error_signal.emit(f'Ошибка в вычислениях: {result.text_error}')
+            self.error_signal.emit(result.text_error)
             self.logger.warning('Ошибка в вычислениях: %s', result.text_error)
         else:
             self.error_signal.emit(f'Статус не определен: {stat}')
