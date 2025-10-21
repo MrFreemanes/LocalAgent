@@ -8,7 +8,7 @@ from core.scanning.windows_scan import WindowsScanner
 from logs.logger_cfg import cfg
 
 logging.config.dictConfig(cfg)
-logger = logging.getLogger()
+logger = logging.getLogger('log_worker')
 
 
 def worker(task_q: mp.Queue, result_q: mp.Queue):
@@ -17,7 +17,8 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
     :param task_q: Очередь с задачами
     :param result_q: Очередь с результатами
     """
-    db = initialize(r'C:\Users\notebook\Desktop\test_LocalAgent')  # TODO: Загрузка последней открытой папки пир запуске
+    db = initialize(r'C:\Users\notebook\Desktop\test_LocalAgent',
+                    result_q)  # TODO: Загрузка последней открытой папки пир запуске
     while True:
         item = task_q.get()
 
@@ -30,13 +31,14 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
             path = item.new_path
             logger.debug('initialize путь: %s', path)
 
-            db.close()
-            db = initialize(path)
-        elif task == 'scanning':
-            logger.debug('scanning', r'C:\Users\notebook\Desktop\test_LocalAgent')
+            if db is not None: db.close()
+            db = initialize(path, result_q)
+        elif task == 'scanning' and db is not None:
+            logger.debug('scanning %s', r'C:\Users\notebook\Desktop\test_LocalAgent')
             scanning(r'C:\Users\notebook\Desktop\test_LocalAgent', db, result_q)
 
-    db.close()
+    if db is not None: db.close()
+
 
 def scanning(path: str, files_db, result_q) -> None:
     """
@@ -48,5 +50,9 @@ def scanning(path: str, files_db, result_q) -> None:
     """
     scan = WindowsScanner(path, files_db)
     for progress in scan.scan():
-        result_q.put(Result({}, Status.RUN, progress))
-    result_q.put(Result({}, Status.DONE, 100))
+        if 100 > progress > 0:
+            result_q.put(Result({}, Status.RUN, progress))
+        elif progress == 100:
+            result_q.put(Result({}, Status.DONE, 100))
+        else:
+            result_q.put(Result({}, Status.ERROR, 100, text_error='Ошибка: директория не была просканирована'))
