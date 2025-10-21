@@ -25,7 +25,7 @@ class FileDB(BaseDB):
         )""")
         self._conn.commit()
 
-    def get_file_by_path(self, path: str) -> dict:
+    def get_file_by_path(self, path: str) -> dict | None:
         """Возвращает данные по запросу для последующего сравнения."""
         cur = self._conn.execute("SELECT * FROM files WHERE path = ?", (path,))
         return cur.fetchone()
