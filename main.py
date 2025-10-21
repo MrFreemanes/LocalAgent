@@ -27,8 +27,6 @@ def main():
     app.exec()
 
     task_q.put(None)
-    w.terminate()
-    w.join(timeout=1)
 
 
 if __name__ == '__main__':
