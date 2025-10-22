@@ -71,7 +71,16 @@ cfg = {
             'maxBytes': 1 * 1024 * 1024,
             'backupCount': 2,
             'encoding': 'utf-8'
-        }
+        },
+        'file_utils': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'DEBUG',
+            'filename': path_to_log("utils.log"),
+            'formatter': 'file_msg',
+            'maxBytes': 1 * 1024 * 1024,
+            'backupCount': 2,
+            'encoding': 'utf-8'
+        },
     },
     'loggers': {
         'log_main': {
@@ -103,6 +112,11 @@ cfg = {
             'level': 'DEBUG',
             'handlers': ['console', 'file_scan'],
             'propagate': False
-        }
+        },
+        'log_utils': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file_utils'],
+            'propagate': False
+        },
     }
 }
