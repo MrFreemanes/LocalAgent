@@ -12,7 +12,7 @@ class FileDBTest(TestCase):
         connect = files_db.FileDB.connect
 
         self_mock = Mock()
-        self_mock._path_db = r'C:/Program Files'
+        self_mock.path_db = r'C:/Program Files'
         self_mock._conn = Mock()
         self_mock.logger = Mock()
 

@@ -14,7 +14,7 @@ class BaseDB(ABC):
         logging.config.dictConfig(cfg)
         self.logger = logging.getLogger('log_db')
 
-        self._path_db = path_db
+        self.path_db = path_db
         self._conn = None
         self.connect()
         self._create_tables()

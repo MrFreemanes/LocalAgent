@@ -10,6 +10,10 @@ class MainWindow(BaseWindow):
         self.ui.setupUi(self)
         self.setWindowTitle('Test')
 
+        # При любом изменении пути мы всегда должны отправлять задачу с инициализацией (подключить сигнал изменения label)
+        self.path_to_dir = r'C:/Users/notebook/Desktop/test_LocalAgent'
+        self.bridge.send_task(Task('init', self.path_to_dir))
+
     def _connect_widget(self) -> None:
         """Подключение виджетов к функциям."""
         self.ui.pushButton.clicked.connect(self._run)
@@ -21,7 +25,7 @@ class MainWindow(BaseWindow):
 
     # --- реализация приложения ---
     def _run(self) -> None:
-        self.bridge.send_task(Task('scanning'))
+        self.bridge.send_task(Task('scanning', self.path_to_dir))
 
     def _update_progress(self, result) -> None:
         self.ui.progressBar.setValue(result.progress)

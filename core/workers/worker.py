@@ -17,8 +17,7 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
     :param task_q: Очередь с задачами
     :param result_q: Очередь с результатами
     """
-    db = initialize(r'C:\Users\notebook\Desktop\test_LocalAgent',
-                    result_q)  # TODO: Загрузка последней открытой папки пир запуске
+    db = None
     while True:
         item = task_q.get()
 
@@ -26,16 +25,15 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
 
         logger.debug('Получена задача %s', item.__repr__())
         task = item.task
+        path = item.new_path
 
-        if task == 'initialize':
-            path = item.new_path
+        if task == 'init':
             logger.debug('initialize путь: %s', path)
-
             if db is not None: db.close()
             db = initialize(path, result_q)
         elif task == 'scanning' and db is not None:
-            logger.debug('scanning %s', r'C:\Users\notebook\Desktop\test_LocalAgent')
-            scanning(r'C:\Users\notebook\Desktop\test_LocalAgent', db, result_q)
+            logger.debug('scanning путь: %s', path)
+            scanning(path, db, result_q)
 
     if db is not None: db.close()
 

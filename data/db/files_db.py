@@ -7,7 +7,7 @@ from data.db.base_db import BaseDB
 class FileDB(BaseDB):
     def connect(self) -> None:
         """Подключает базу данных."""
-        path = f"{self._path_db}/files.db"
+        path = f"{self.path_db}/files.db"
         self._conn = sqlite3.connect(path)
         self._conn.row_factory = sqlite3.Row
 
