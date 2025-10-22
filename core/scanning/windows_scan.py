@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from core.scanning.base_scan import BaseScanner
 from utils.hashing import hash_file
 
@@ -60,4 +61,4 @@ class WindowsScanner(BaseScanner):
             elif existing["hash"] != hash_:
                 self._db.update(str(rel_path), mtime, hash_, indexed=0)
         except Exception as e:
-            self.logger.error('Ошибка обработки файлов: %s', e)
+            self.logger.error("Ошибка при обработке файла %s: %s", file, e)
