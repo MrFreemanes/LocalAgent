@@ -19,4 +19,4 @@ class Result:
     data: dict
     status: str
     progress: int
-    text_error: str = None
+    text_error: str = 'Ошибка'

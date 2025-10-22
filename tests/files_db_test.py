@@ -90,3 +90,7 @@ class FileDBTest(TestCase):
         self_mock._conn.commit.return_value = None
         self_mock._conn.execute.return_value = None
         return self_mock
+
+
+if __name__ == '__main__':
+    main()
