@@ -1,3 +1,4 @@
+import numpy as np
 from utils.reader import read_file_to_chunks
 
 
@@ -35,8 +36,10 @@ class Vectorizer:
 
                 # 2. Векторизация и запись
                 for idx, chunk in enumerate(chunks):
-                    vector = self.model.embed(chunk)
-                    self.vector_db.add(rel_path, idx, chunk, vector)
+                    vector = self.model.embed([chunk])[0]
+                    vector = np.array(vector, dtype=np.float32)
+                    vector /= np.linalg.norm(vector)
+                    self.vector_db.add(rel_path, idx, chunk, vector.tolist())
 
                 # 3. Обновляем статус в FilesDB
                 self.files_db.update(

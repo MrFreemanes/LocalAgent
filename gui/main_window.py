@@ -49,5 +49,7 @@ class MainWindow(BaseWindow):
         if result.data['worker'] == 'scanning':
             if result.status == Status.RUN:
                 self.ui.progressBar_scan.setValue(result.progress)
+            elif result.status == Status.DONE:
+                self.ui.progressBar_scan.setValue(result.progress)
         elif result.data['worker'] == 'vector':
             self.ui.progressBar_vector.setValue(result.progress)

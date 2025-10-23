@@ -5,7 +5,7 @@ from multiprocessing import Queue
 
 from data.db import files_db, vector_db
 from config.config import Result, Status
-from utils.model import DummyModel
+from core.models.model import LocalEmbedder
 from logs.logger_cfg import cfg
 
 logging.config.dictConfig(cfg)
@@ -24,7 +24,7 @@ def initialize(path_dir_agent: str, result_q: Queue):
         f_db = files_db.FileDB(dir_agent)
         v_db = vector_db.VectorDB(dir_agent)
 
-        model = DummyModel()
+        model = LocalEmbedder()
 
         logger.debug('Базы данных и модель успешно инициализированы')
 
