@@ -5,6 +5,7 @@ from logging import config
 from config.config import Status, Result
 from utils.agent_init import initialize
 from core.scanning.windows_scan import WindowsScanner
+from core.vectorizers.vectorizer import Vectorizer
 from logs.logger_cfg import cfg
 
 logging.config.dictConfig(cfg)
@@ -17,7 +18,7 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
     :param task_q: Очередь с задачами
     :param result_q: Очередь с результатами
     """
-    db = None
+    f_db, v_db, model = None, None, None
     while True:
         item = task_q.get()
 
@@ -29,13 +30,19 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
 
         if task == 'init':
             logger.debug('initialize путь: %s', path)
-            if db is not None: db.close()
-            db = initialize(path, result_q)
-        elif task == 'scanning' and db is not None:
+            if f_db is not None and v_db is not None:
+                f_db.close()
+                v_db.close()
+            f_db, v_db, model = initialize(path, result_q)
+        elif task == 'scanning' and f_db is not None:
             logger.debug('scanning путь: %s', path)
-            scanning(path, db, result_q)
+            scanning(path, f_db, result_q)
+        elif task == 'vector':
+            vectorization(path, f_db, v_db, model, result_q)
 
-    if db is not None: db.close()
+    if f_db is not None and v_db is not None:
+        f_db.close()
+        v_db.close()
 
 
 def scanning(path: str, files_db, result_q) -> None:
@@ -54,3 +61,17 @@ def scanning(path: str, files_db, result_q) -> None:
             result_q.put(Result({}, Status.DONE, 100))
         else:
             result_q.put(Result({}, Status.ERROR, 100, text_error='Ошибка: директория не была просканирована'))
+
+
+def vectorization(path: str, files_db, vector_db, model, result_q) -> None:
+    """
+
+    :param path:
+    :param files_db:
+    :param vector_db:
+    :param result_q:
+    """
+
+    vectorizer = Vectorizer(files_db, vector_db, model, path)
+    for progress in vectorizer.run():
+        print(progress)

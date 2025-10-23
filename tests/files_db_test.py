@@ -25,7 +25,7 @@ class FileDBTest(TestCase):
         sqlite3_mock.connect.assert_called_once_with(self._path)
         self.assertEqual(self_mock._conn.row_factory, 'Row')
 
-        self.assertEqual(self_mock.logger.debug.call_args[0], ('db открыта: %s', self._path))
+        self.assertEqual(self_mock.logger.debug.call_args[0], ('[FileDB] db открыта: %s', self._path))
 
     def test_create_tables(self):
         create_tables = files_db.FileDB._create_tables

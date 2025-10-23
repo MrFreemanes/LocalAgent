@@ -11,8 +11,11 @@ class VectorDB(BaseDB):
     """
 
     def connect(self):
-        self._conn = sqlite3.connect(f"{self.path_db}/vectors.db")
+        path = f"{self.path_db}/vectors.db"
+        self._conn = sqlite3.connect(path)
         self._conn.row_factory = sqlite3.Row
+
+        self.logger.debug('[VectorDB] db открыта: %s', path)
 
     def _create_tables(self):
         self._conn.execute("""

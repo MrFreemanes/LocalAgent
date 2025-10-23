@@ -5,6 +5,9 @@ from utils.hashing import hash_file
 
 
 class WindowsScanner(BaseScanner):
+    # расширения, которые хотим пропускать (строки с точкой, в нижнем регистре)
+    IGNORE_EXTS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
+
     def scan(self):
         """Сканирует все файлы в папке и подпапках."""
         vault = Path(self._vault_path)
@@ -32,7 +35,7 @@ class WindowsScanner(BaseScanner):
         self.logger.debug('Просканировано %s файлов в %s', i, self._vault_path)
 
     def _collect_files(self, vault: Path) -> list[Path]:
-        """Собирает все файлы, игнорируя служебные директории."""
+        """Собирает все файлы, игнорируя служебные директории и расширения."""
         ignore_dirs = {"LocalAgent"}
 
         files = []
@@ -44,12 +47,20 @@ class WindowsScanner(BaseScanner):
             if any(ignored in f.parts for ignored in ignore_dirs):
                 continue
 
+            # Пропускаем по расширению (чувствительность к регистру убираем через lower())
+            if f.suffix.lower() in self.IGNORE_EXTS:
+                continue
+
             files.append(f)
 
         return files
 
     def _process_file(self, vault: Path, file: Path) -> None:
         """Обрабатывает один файл — проверяет хэш и обновляет БД."""
+        # дополнительная защита: повторная проверка расширения
+        if file.suffix.lower() in self.IGNORE_EXTS:
+            return
+
         rel_path = file.relative_to(vault)
         try:
             mtime = file.stat().st_mtime
