@@ -25,10 +25,12 @@ class MainWindow(BaseWindow):
 
     # --- реализация приложения ---
     def _run(self) -> None:
+        self.ui.pushButton.setEnabled(True)
         self.bridge.send_task(Task('scanning', self.path_to_dir))
 
     def _update_progress(self, result) -> None:
         self.ui.progressBar.setValue(result.progress)
 
     def _done_scan(self, result):
+        self.ui.pushButton.setFlat(False)
         self.ui.progressBar.setValue(result.progress)

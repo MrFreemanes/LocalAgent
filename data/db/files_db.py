@@ -11,7 +11,7 @@ class FileDB(BaseDB):
         self._conn = sqlite3.connect(path)
         self._conn.row_factory = sqlite3.Row
 
-        self.logger.debug('db открыта: %s', path)
+        self.logger.debug('[FileDB] db открыта: %s', path)
 
     def _create_tables(self) -> None:
         """Создает таблицу через (IF NOT EXISTS)."""
