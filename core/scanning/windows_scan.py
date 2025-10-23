@@ -28,7 +28,7 @@ class WindowsScanner(BaseScanner):
         for i, file in enumerate(files, 1):
             self._process_file(vault, file)
             progress = int(i / total * 100)
-            if progress >= last_progress + 1 or progress == 100:
+            if progress > last_progress + 1 or progress == 100:
                 yield progress
                 last_progress = progress
 

@@ -56,16 +56,18 @@ def scanning(path: str, files_db, result_q) -> None:
     scan = WindowsScanner(path, files_db)
     for progress in scan.scan():
         if 100 > progress > 0:
-            result_q.put(Result({}, Status.RUN, progress))
+            result_q.put(Result({'worker': 'scanning'}, Status.RUN, progress))
         elif progress == 100:
-            result_q.put(Result({}, Status.DONE, 100))
+            result_q.put(Result({'worker': 'scanning'}, Status.DONE, 100))
         else:
-            result_q.put(Result({}, Status.ERROR, 100, text_error='Ошибка: директория не была просканирована'))
+            result_q.put(Result({'worker': 'scanning'}, Status.ERROR, 100,
+                                text_error='Ошибка: директория не была просканирована'))
 
 
 def vectorization(path: str, files_db, vector_db, model, result_q) -> None:
     """
 
+    :param model:
     :param path:
     :param files_db:
     :param vector_db:
@@ -74,4 +76,9 @@ def vectorization(path: str, files_db, vector_db, model, result_q) -> None:
 
     vectorizer = Vectorizer(files_db, vector_db, model, path)
     for progress in vectorizer.run():
-        print(progress)
+        if 100 > progress > 0:
+            result_q.put(Result({'worker': 'vector'}, Status.RUN, progress, ))
+        elif progress == 100:
+            result_q.put(Result({'worker': 'vector'}, Status.DONE, 100, ))
+        elif progress == 0:
+            result_q.put(Result({'worker': 'vector'}, Status.DONE, 100, ))

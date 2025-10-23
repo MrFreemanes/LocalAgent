@@ -15,14 +15,16 @@ class Vectorizer:
 
     def run(self):
         """
-        Основной метод — проходит по всем файлам с indexed = 0.
+        Основной метод. проходит по всем файлам с indexed = 0.
         """
         unindexed_files = self.files_db.get_unindexed_files()
         total = len(unindexed_files)
 
         if total == 0:
+            yield 0
             return
 
+        last_progress = -1
         for i, file in enumerate(unindexed_files, 1):
             try:
                 rel_path = file["path"]
@@ -47,4 +49,7 @@ class Vectorizer:
             except Exception as e:
                 print(f"[Vectorizer] Ошибка при обработке {file['path']}: {e}")
 
-            yield int(i / total * 100)  # для UI прогресса
+            progress = int(i / total * 100)
+            if progress > last_progress + 1 or progress == 100:
+                yield progress
+                last_progress = progress

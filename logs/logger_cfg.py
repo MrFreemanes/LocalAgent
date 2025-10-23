@@ -2,13 +2,14 @@ from utils.paths import path_to_log
 
 cfg = {
     'version': 1,
+    'disable_existing_loggers': False,
     'formatters': {
         'console_msg': {
-            'format': '%(asctime)s | %(levelname)7s | %(filename)s:%(funcName)s:%(lineno)s | %(message)s',
+            'format': '%(asctime)s | %(levelname)3s | %(filename)s:%(funcName)s:%(lineno)s | %(message)s',
             'datefmt': '%d-%m-%Y %H:%M:%S'
         },
         'file_msg': {
-            'format': '%(asctime)s | %(levelname)7s | %(filename)s:%(funcName)s:%(lineno)s | %(message)s',
+            'format': '%(asctime)s | %(levelname)3s | %(filename)s:%(funcName)s:%(lineno)s | %(message)s',
             'datefmt': '%d-%m-%Y %H:%M:%S'
         }
     },
@@ -19,66 +20,73 @@ cfg = {
             'formatter': 'console_msg'
         },
         'file_main': {
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'level': 'DEBUG',
             'filename': path_to_log("main.log"),
             'formatter': 'file_msg',
-            'maxBytes': 5 * 1024 * 1024,  # 5 MB
-            'backupCount': 5,  # хранить 5 старых файлов
+            'when': 'midnight',        # ротация каждый день в полночь
+            'interval': 1,
+            'backupCount': 3,          # хранить 3 последних логов
             'encoding': 'utf-8'
         },
         'file_gui': {
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'level': 'DEBUG',
             'filename': path_to_log("gui.log"),
             'formatter': 'file_msg',
-            'maxBytes': 5 * 1024 * 1024,
+            'when': 'midnight',
+            'interval': 1,
             'backupCount': 3,
             'encoding': 'utf-8'
         },
         'file_bridge': {
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'level': 'DEBUG',
             'filename': path_to_log("bridges.log"),
             'formatter': 'file_msg',
-            'maxBytes': 1 * 1024 * 1024,
+            'when': 'midnight',
+            'interval': 1,
             'backupCount': 3,
             'encoding': 'utf-8'
         },
         'file_worker': {
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'level': 'DEBUG',
             'filename': path_to_log("worker.log"),
             'formatter': 'file_msg',
-            'maxBytes': 1 * 1024 * 1024,
+            'when': 'midnight',
+            'interval': 1,
             'backupCount': 3,
             'encoding': 'utf-8'
         },
         'file_db': {
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'level': 'DEBUG',
             'filename': path_to_log("db.log"),
             'formatter': 'file_msg',
-            'maxBytes': 1 * 1024 * 1024,
-            'backupCount': 2,
+            'when': 'midnight',
+            'interval': 1,
+            'backupCount': 3,
             'encoding': 'utf-8'
         },
         'file_scan': {
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'level': 'DEBUG',
             'filename': path_to_log("scan.log"),
             'formatter': 'file_msg',
-            'maxBytes': 1 * 1024 * 1024,
-            'backupCount': 2,
+            'when': 'midnight',
+            'interval': 1,
+            'backupCount': 3,
             'encoding': 'utf-8'
         },
         'file_utils': {
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'level': 'DEBUG',
             'filename': path_to_log("utils.log"),
             'formatter': 'file_msg',
-            'maxBytes': 1 * 1024 * 1024,
-            'backupCount': 2,
+            'when': 'midnight',
+            'interval': 1,
+            'backupCount': 3,
             'encoding': 'utf-8'
         },
     },
