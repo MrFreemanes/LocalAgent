@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QFileDialog
+from PySide6.QtWidgets import QFileDialog, QLabel, QProgressBar
 
 from gui.base_window import BaseWindow
 from gui.ui.ui_untitled import Ui_MainWindow
@@ -12,16 +12,18 @@ class MainWindow(BaseWindow):
         self.ui.setupUi(self)
         self.setWindowTitle('Test')
 
-        # При любом изменении пути мы всегда должны отправлять задачу с инициализацией (подключить сигнал изменения label)
-        self.path_to_dir = r'C:/Users/notebook/Desktop/test_LocalAgent'
-        self.ui.label.setText(self.path_to_dir)
-        self.bridge.send_task(Task('init', self.path_to_dir))
+        self.ui.lineEdit_massage.setPlaceholderText("Введите запрос, например: 'веселые стрекозы'")
+
+        self.path_to_dir = None
+        self.progress_label = QLabel()
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setValue(0)
 
     def _connect_widget(self) -> None:
         """Подключение виджетов к функциям."""
-        self.ui.pushButton.clicked.connect(self._run_init)
-        self.ui.pbt_scan.clicked.connect(self._run_scan)
-        self.ui.pbt_vector.clicked.connect(self._run_vector)
+        self.ui.btn_init.clicked.connect(self._run_init)
+        self.ui.btn_massage.clicked.connect(self._send_message)
+        self.ui.lineEdit_massage.returnPressed.connect(self._send_message)
 
     def _connect_bridge_signals(self) -> None:
         """Подключение сигналов из моста."""
@@ -34,22 +36,66 @@ class MainWindow(BaseWindow):
         if folder == '':
             return
         self.path_to_dir = folder
-        self.ui.label.setText(self.path_to_dir)
-        self.bridge.send_task(Task('init', self.path_to_dir))
-        self.ui.progressBar_scan.setValue(0)
-        self.ui.progressBar_vector.setValue(0)
+        self.ui.label_dir.setText(self.path_to_dir)
 
-    def _run_vector(self):
-        self.bridge.send_task(Task('vector', self.path_to_dir))
+        self.bridge.send_task(Task('init', self.path_to_dir))
+
+        self._create_layout_progress()
+        self._run_scan()
+        self._run_vector()
 
     def _run_scan(self):
+        self._off_all_btn()
         self.bridge.send_task(Task('scanning', self.path_to_dir))
+        self.progress_label.setText('Сканирование... Пожалуйста подождите.')
+
+    def _run_vector(self):
+        self._off_all_btn()
+        self.bridge.send_task(Task('vector', self.path_to_dir))
+        self.progress_label.setText('Векторизация... Это займет время.')
 
     def _check_signal(self, result):
-        if result.data['worker'] == 'scanning':
+        worker = result.data['worker']
+        if worker == 'scanning':
             if result.status == Status.RUN:
-                self.ui.progressBar_scan.setValue(result.progress)
+                self.progress_bar.setValue(result.progress)
             elif result.status == Status.DONE:
-                self.ui.progressBar_scan.setValue(result.progress)
-        elif result.data['worker'] == 'vector':
-            self.ui.progressBar_vector.setValue(result.progress)
+                self.progress_label.setText('Сканирование завершено.')
+                self.progress_bar.setValue(result.progress)
+        elif worker == 'vector':
+            if result.status == Status.RUN:
+                self.progress_bar.setValue(result.progress)
+            elif result.status == Status.DONE:
+                self._clear_layout(self.ui.horizontalLayout_progress)
+                self._on_all_btn()
+
+    def _off_all_btn(self):
+        self.ui.btn_init.setEnabled(False)
+        self.ui.btn_massage.setEnabled(False)
+
+    def _on_all_btn(self):
+        self.ui.btn_init.setEnabled(True)
+        self.ui.btn_massage.setEnabled(True)
+
+    def _create_layout_progress(self):
+        self.ui.horizontalLayout_progress.addWidget(self.progress_label)
+        self.ui.horizontalLayout_progress.addWidget(self.progress_bar)
+
+    def _clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+            else:
+                sub_layout = item.layout()
+                if sub_layout is not None:
+                    self._clear_layout(sub_layout)
+
+    def _send_message(self):
+        text = self.ui.lineEdit_massage.text().strip()
+        if not text:
+            return
+
+        self.ui.textEdit_chat.append(f"<b>Запрос:</b> {text}")
+        self.ui.lineEdit_massage.clear()

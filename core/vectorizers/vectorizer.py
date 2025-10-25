@@ -22,7 +22,7 @@ class Vectorizer:
         total = len(unindexed_files)
 
         if total == 0:
-            yield 0
+            yield 100
             return
 
         last_progress = -1

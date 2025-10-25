@@ -11,9 +11,10 @@ class MainWindowTest(TestCase):
     Проверка привязки сигналов из класса Bridge.
     """
 
-    @patch('gui.main_window.Graph', create=True)
+    @patch('gui.main_window.QProgressBar')
+    @patch('gui.main_window.QLabel')
     @patch('gui.main_window.Ui_MainWindow')
-    def test_setup_ui(self, ui_main_window_mock, graph_mock):
+    def test_setup_ui(self, ui_main_window_mock, *args):
         """
         Тест не полный. Проверяет, был ли создан ui.
         Остальные проверки зависят от конкретной реализации.
@@ -22,7 +23,6 @@ class MainWindowTest(TestCase):
         ui_mock.setupUi = Mock(return_value=None)
 
         ui_main_window_mock.return_value = ui_mock
-        graph_mock.return_value = Mock()
 
         self_mock = Mock()
 
