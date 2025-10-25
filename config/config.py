@@ -12,6 +12,7 @@ class Status:
 class Task:
     task: str
     new_path: str = None
+    query: str = None
 
 
 @dataclass(repr=True)

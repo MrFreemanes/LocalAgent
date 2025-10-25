@@ -39,6 +39,9 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
             scanning(path, f_db, result_q)
         elif task == 'vector':
             vectorization(path, f_db, v_db, model, result_q)
+        elif task == 'request' and model is not None and item.query is not None:
+            results = model.request(item.query, v_db)
+            result_q.put(Result({'worker': 'request', 'data': results}, Status.DONE, 100))
 
     if f_db is not None and v_db is not None:
         f_db.close()

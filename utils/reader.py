@@ -13,8 +13,7 @@ def read_file_to_chunks(abs_path: str, chunk_size: int = 1000, overlap: int = 10
     with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
         text = f.read()
 
-    text = text.replace("\r", " ").replace("\n", " ")
-    text = re.sub(r"\s+", " ", text).strip()
+    text = normalize_text(text)
 
     chunks = []
     start = 0
@@ -24,3 +23,9 @@ def read_file_to_chunks(abs_path: str, chunk_size: int = 1000, overlap: int = 10
         start += chunk_size - overlap
 
     return chunks
+
+
+def normalize_text(text: str) -> str:
+    text = text.replace("\r", " ").replace("\n", " ")
+    text = re.sub(r"\s+", " ", text).strip()
+    return text

@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QFileDialog, QLabel, QProgressBar
 
 from gui.base_window import BaseWindow
 from gui.ui.ui_untitled import Ui_MainWindow
-from config.config import Task, Status
+from config.config import Task, Status, Result
 
 
 class MainWindow(BaseWindow):
@@ -13,6 +13,8 @@ class MainWindow(BaseWindow):
         self.setWindowTitle('Test')
 
         self.ui.lineEdit_massage.setPlaceholderText("Введите запрос, например: 'веселые стрекозы'")
+        self.ui.lineEdit_massage.setEnabled(False)
+        self.ui.btn_massage.setEnabled(False)
 
         self.path_to_dir = None
         self.progress_label = QLabel()
@@ -22,8 +24,8 @@ class MainWindow(BaseWindow):
     def _connect_widget(self) -> None:
         """Подключение виджетов к функциям."""
         self.ui.btn_init.clicked.connect(self._run_init)
-        self.ui.btn_massage.clicked.connect(self._send_message)
-        self.ui.lineEdit_massage.returnPressed.connect(self._send_message)
+        self.ui.btn_massage.clicked.connect(self._send_request)
+        self.ui.lineEdit_massage.returnPressed.connect(self._send_request)
 
     def _connect_bridge_signals(self) -> None:
         """Подключение сигналов из моста."""
@@ -50,7 +52,6 @@ class MainWindow(BaseWindow):
         self.progress_label.setText('Сканирование... Пожалуйста подождите.')
 
     def _run_vector(self):
-        self._off_all_btn()
         self.bridge.send_task(Task('vector', self.path_to_dir))
         self.progress_label.setText('Векторизация... Это займет время.')
 
@@ -68,12 +69,17 @@ class MainWindow(BaseWindow):
             elif result.status == Status.DONE:
                 self._clear_layout(self.ui.horizontalLayout_progress)
                 self._on_all_btn()
+        elif worker == 'request':
+            if result.status == Status.DONE:
+                self._check_result(result)
 
     def _off_all_btn(self):
+        self.ui.lineEdit_massage.setEnabled(False)
         self.ui.btn_init.setEnabled(False)
         self.ui.btn_massage.setEnabled(False)
 
     def _on_all_btn(self):
+        self.ui.lineEdit_massage.setEnabled(True)
         self.ui.btn_init.setEnabled(True)
         self.ui.btn_massage.setEnabled(True)
 
@@ -92,10 +98,24 @@ class MainWindow(BaseWindow):
                 if sub_layout is not None:
                     self._clear_layout(sub_layout)
 
-    def _send_message(self):
+    def _send_request(self):
         text = self.ui.lineEdit_massage.text().strip()
         if not text:
             return
 
+        self._off_all_btn()
+        self.bridge.send_task(Task('request', query=text))
         self.ui.textEdit_chat.append(f"<b>Запрос:</b> {text}")
         self.ui.lineEdit_massage.clear()
+
+    def _check_result(self, result: Result):
+        top_results = result.data.get('data')
+        if not top_results:
+            return
+
+        self.ui.textEdit_chat.append(f"<b>Ответ:</b>")
+        for r in top_results:
+            self.ui.textEdit_chat.append(f"Файл: {r['file_path']}, Чанк: {r['chunk_index']}, Score: {r['score']:.4f}")
+            self.ui.textEdit_chat.append(f"Текст: {r['text'][:100]}...\n")
+
+        self._on_all_btn()
