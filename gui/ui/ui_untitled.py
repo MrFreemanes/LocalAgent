@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'untitleduXILcY.ui'
+## Form generated from reading UI file 'untitledIkfgap.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.9.1
 ##
@@ -55,6 +55,7 @@ class Ui_MainWindow(object):
 
         self.textEdit_chat = QTextEdit(self.centralwidget)
         self.textEdit_chat.setObjectName(u"textEdit_chat")
+        self.textEdit_chat.setReadOnly(True)
 
         self.verticalLayout.addWidget(self.textEdit_chat)
 

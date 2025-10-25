@@ -56,7 +56,11 @@
      <layout class="QHBoxLayout" name="horizontalLayout_progress"/>
     </item>
     <item>
-     <widget class="QTextEdit" name="textEdit_chat"/>
+     <widget class="QTextEdit" name="textEdit_chat">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
