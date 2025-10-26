@@ -38,7 +38,6 @@ class VectorDB(BaseDB):
             VALUES (?, ?, ?, ?, ?)
             """, (file_path, chunk_index, text, json.dumps(vector), time.time()))
             self._conn.commit()
-            self.logger.debug('[VectorDB] Добавлен вектор %s #%s', file_path, chunk_index)
         except Exception as e:
             self.logger.error('[VectorDB] Ошибка при добавлении: %s', e)
 
@@ -51,7 +50,6 @@ class VectorDB(BaseDB):
             WHERE file_path = ? AND chunk_index = ?
             """, (text, json.dumps(vector), time.time(), file_path, chunk_index))
             self._conn.commit()
-            self.logger.debug('[VectorDB] Обновлён вектор ^s #%s', file_path, chunk_index)
         except Exception as e:
             self.logger.error('[VectorDB] Ошибка при обновлении: %s', e)
 

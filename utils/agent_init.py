@@ -30,7 +30,6 @@ def initialize(path_dir_agent: str, result_q: Queue):
 
         return f_db, v_db, model
     else:
-        # отключать интерфейс при этой ошибке чтобы пользователь не смог сканировать не существующую папку.
         result_q.put(Result({}, Status.ERROR, 100, text_error=f"Директории {path_dir_agent} не существует"))
         logger.warning('Директории %s не существует', path_dir_agent)
         return None

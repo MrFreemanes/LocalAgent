@@ -10,7 +10,7 @@ class MainWindow(BaseWindow):
         """Обозначение главных переменных."""
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle('Test')
+        self.setWindowTitle('LocalAgent')
 
         self.ui.lineEdit_massage.setPlaceholderText("Введите запрос, например: 'веселые стрекозы'")
         self.ui.lineEdit_massage.setEnabled(False)
@@ -27,13 +27,22 @@ class MainWindow(BaseWindow):
         self.ui.btn_massage.clicked.connect(self._send_request)
         self.ui.lineEdit_massage.returnPressed.connect(self._send_request)
 
+        self.logger.debug('Виджеты подключены.')
+
     def _connect_bridge_signals(self) -> None:
         """Подключение сигналов из моста."""
         self.bridge.process_signal.connect(self._check_signal)
         self.bridge.done_signal.connect(self._check_signal)
 
+        self.logger.debug('Сигналы подключены.')
+
     # --- реализация приложения ---
     def _run_init(self):
+        """
+        Вызывает всплывающее окно для выбора директории.
+        Создает задачу для инициализации директории.
+        Вызывает метод сканирования и векторизации.
+        """
         folder = QFileDialog.getExistingDirectory(self, "Выберите папку с заметками")
         if folder == '':
             return
@@ -42,20 +51,36 @@ class MainWindow(BaseWindow):
 
         self.bridge.send_task(Task('init', self.path_to_dir))
 
+        self.logger.debug('Инициализация запущена.')
+
         self._create_layout_progress()
         self._run_scan()
         self._run_vector()
 
     def _run_scan(self):
+        """
+        Отключает кнопки.
+        Создает задачу сканирования и отправляет через мост.
+        Устанавливает текст для отзывчивости в progress_label.
+        """
         self._off_all_btn()
         self.bridge.send_task(Task('scanning', self.path_to_dir))
         self.progress_label.setText('Сканирование... Пожалуйста подождите.')
 
     def _run_vector(self):
+        """
+        Отключает кнопки.
+        Создает задачу векторизации и отправляет через мост.
+        Устанавливает текст для отзывчивости в progress_label.
+        """
         self.bridge.send_task(Task('vector', self.path_to_dir))
         self.progress_label.setText('Векторизация... Это займет время.')
 
     def _check_signal(self, result):
+        """
+        Получает результат при сканировании, векторизации, запроса к модели.
+        :param result: Результат из очереди от воркера.
+        """
         worker = result.data['worker']
         if worker == 'scanning':
             if result.status == Status.RUN:
@@ -63,31 +88,48 @@ class MainWindow(BaseWindow):
             elif result.status == Status.DONE:
                 self.progress_label.setText('Сканирование завершено.')
                 self.progress_bar.setValue(result.progress)
+
+                self.logger.debug('Сканирование завершено.')
         elif worker == 'vector':
             if result.status == Status.RUN:
                 self.progress_bar.setValue(result.progress)
             elif result.status == Status.DONE:
                 self._clear_layout(self.ui.horizontalLayout_progress)
                 self._on_all_btn()
+
+                self.logger.debug('Векторизация завершена.')
         elif worker == 'request':
             if result.status == Status.DONE:
                 self._check_result(result)
+                self.logger.debug('Ответ от модели получен.')
 
     def _off_all_btn(self):
+        """Отключает все кнопки кроме init."""
         self.ui.lineEdit_massage.setEnabled(False)
         self.ui.btn_init.setEnabled(False)
         self.ui.btn_massage.setEnabled(False)
 
+        self.logger.debug('Кнопки отключены')
+
     def _on_all_btn(self):
+        """Включает все кнопки кроме init."""
         self.ui.lineEdit_massage.setEnabled(True)
         self.ui.btn_init.setEnabled(True)
         self.ui.btn_massage.setEnabled(True)
 
+        self.logger.debug('Кнопки включены')
+
     def _create_layout_progress(self):
+        """
+        Устанавливает в horizontalLayout_progress виджеты
+        для отзывчивости при сканировании и векторизации.
+        """
         self.ui.horizontalLayout_progress.addWidget(self.progress_label)
         self.ui.horizontalLayout_progress.addWidget(self.progress_bar)
 
     def _clear_layout(self, layout):
+        """Отчищает переданный layout"""
+        self.logger.debug('Отчистка layout: %s', layout)
         while layout.count():
             item = layout.takeAt(0)
             widget = item.widget()
@@ -99,6 +141,7 @@ class MainWindow(BaseWindow):
                     self._clear_layout(sub_layout)
 
     def _send_request(self):
+        """Отправляет задачу через мост в воркер для 'общения' с моделью."""
         text = self.ui.lineEdit_massage.text().strip()
         if not text:
             return
@@ -108,7 +151,10 @@ class MainWindow(BaseWindow):
         self.ui.textEdit_chat.append(f"<b>Запрос:</b> {text}")
         self.ui.lineEdit_massage.clear()
 
+        self.logger.debug('Отправлена задача с текстом text')
+
     def _check_result(self, result: Result):
+        """Устанавливает ответ от модели в textEdit_chat."""
         top_results = result.data.get('data')
         if not top_results:
             return
@@ -119,3 +165,5 @@ class MainWindow(BaseWindow):
             self.ui.textEdit_chat.append(f"Текст: {r['text'][:100]}...\n")
 
         self._on_all_btn()
+
+        self.logger.debug('Ответ от модели: %s', top_results)

@@ -1,5 +1,6 @@
 from utils.paths import path_to_log
 
+# FIXME: ошибка при создании нового файла
 cfg = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -24,9 +25,9 @@ cfg = {
             'level': 'DEBUG',
             'filename': path_to_log("main.log"),
             'formatter': 'file_msg',
-            'when': 'midnight',        # ротация каждый день в полночь
+            'when': 'midnight',  # ротация каждый день в полночь
             'interval': 1,
-            'backupCount': 3,          # хранить 3 последних логов
+            'backupCount': 3,  # хранить 3 последних логов
             'encoding': 'utf-8'
         },
         'file_gui': {
@@ -89,6 +90,26 @@ cfg = {
             'backupCount': 3,
             'encoding': 'utf-8'
         },
+        'file_vectorizer': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'level': 'DEBUG',
+            'filename': path_to_log("vectorizer.log"),
+            'formatter': 'file_msg',
+            'when': 'midnight',
+            'interval': 1,
+            'backupCount': 1,
+            'encoding': 'utf-8'
+        },
+        'file_model': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'level': 'DEBUG',
+            'filename': path_to_log("model.log"),
+            'formatter': 'file_msg',
+            'when': 'midnight',
+            'interval': 1,
+            'backupCount': 1,
+            'encoding': 'utf-8'
+        },
     },
     'loggers': {
         'log_main': {
@@ -124,6 +145,16 @@ cfg = {
         'log_utils': {
             'level': 'DEBUG',
             'handlers': ['console', 'file_utils'],
+            'propagate': False
+        },
+        'log_vectorizer': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file_vectorizer'],
+            'propagate': False
+        },
+        'log_model': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file_model'],
             'propagate': False
         },
     }

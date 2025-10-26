@@ -38,8 +38,10 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
             logger.debug('scanning путь: %s', path)
             scanning(path, f_db, result_q)
         elif task == 'vector':
+            logger.debug('vector путь: %s', path)
             vectorization(path, f_db, v_db, model, result_q)
         elif task == 'request' and model is not None and item.query is not None:
+            logger.debug('request текст: %s', item.query)
             results = model.request(item.query, v_db)
             result_q.put(Result({'worker': 'request', 'data': results}, Status.DONE, 100))
 
@@ -52,7 +54,7 @@ def scanning(path: str, files_db, result_q) -> None:
     """
     Запускает сканирование в указанной папке.
     Передает прогресс в Bridge.
-    :param path: Название папки для сканирования.
+    :param path: Путь до папки для сканирования.
     :param files_db: Экземпляр класса FileDB.
     :param result_q: Очередь для отправки результатов.
     """
@@ -65,16 +67,17 @@ def scanning(path: str, files_db, result_q) -> None:
         else:
             result_q.put(Result({'worker': 'scanning'}, Status.ERROR, 100,
                                 text_error='Ошибка: директория не была просканирована'))
+            logger.warning('Ошибка: директория не была просканирована')
 
 
 def vectorization(path: str, files_db, vector_db, model, result_q) -> None:
     """
-
-    :param model:
-    :param path:
-    :param files_db:
-    :param vector_db:
-    :param result_q:
+    Функция для векторизации.
+    :param model: Созданная в initialize() модель
+    :param path: Путь до папки для векторизации.
+    :param files_db: Класс взаимодействия с files.db.
+    :param vector_db: Класс взаимодействия с vectors.db.
+    :param result_q: Очередь для отправки результатов.
     """
 
     vectorizer = Vectorizer(files_db, vector_db, model, path)
@@ -85,3 +88,5 @@ def vectorization(path: str, files_db, vector_db, model, result_q) -> None:
             result_q.put(Result({'worker': 'vector'}, Status.DONE, 100, ))
         elif progress == 0:
             result_q.put(Result({'worker': 'vector'}, Status.DONE, 100, ))
+        else:
+            logger.warning('Ошибка, progress = %s', progress)

@@ -25,7 +25,11 @@ def read_file_to_chunks(abs_path: str, chunk_size: int = 1000, overlap: int = 10
     return chunks
 
 
-def normalize_text(text: str) -> str:
-    text = text.replace("\r", " ").replace("\n", " ")
+def normalize_text(_text: str) -> str:
+    """
+    Получает не обработанный текст.
+    Возвращает текст готовый для использования в модели.
+    """
+    text = _text.replace("\r", " ").replace("\n", " ")
     text = re.sub(r"\s+", " ", text).strip()
     return text
