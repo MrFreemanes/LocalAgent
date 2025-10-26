@@ -42,7 +42,7 @@ class Vectorizer:
         last_progress = -1
         for i, file in enumerate(unindexed_files, 1):
             try:
-                rel_path = file["path"]
+                rel_path = file['path']
                 abs_path = f"{self.base_path}/{rel_path}"
 
                 # 1. Читаем и делим на чанки
@@ -58,8 +58,8 @@ class Vectorizer:
                 # 3. Обновляем статус в FilesDB
                 self.files_db.update(
                     path=rel_path,
-                    mtime=file["mtime"],
-                    hash_=file["hash"],
+                    mtime=file['mtime'],
+                    hash_=file['hash'],
                     indexed=1
                 )
 
