@@ -12,7 +12,7 @@ logging.config.dictConfig(cfg)
 logger = logging.getLogger('log_worker')
 
 
-def worker(task_q: mp.Queue, result_q: mp.Queue):
+def worker(task_q: mp.Queue, result_q: mp.Queue) -> None:
     """
     CPU-GPU-IO нагрузка. Используется как отдельный процесс.
     :param task_q: Очередь с задачами
@@ -20,30 +20,34 @@ def worker(task_q: mp.Queue, result_q: mp.Queue):
     """
     f_db, v_db, model = None, None, None
     while True:
-        item = task_q.get()
+        try:
+            item = task_q.get()
 
-        if item is None: break
+            if item is None: break
 
-        logger.debug('Получена задача %s', item.__repr__())
-        task = item.task
-        path = item.new_path
+            logger.debug('Получена задача %s', item)
+            task = item.task
+            path = item.new_path
 
-        if task == 'init':
-            logger.debug('initialize путь: %s', path)
-            if f_db is not None and v_db is not None:
-                f_db.close()
-                v_db.close()
-            f_db, v_db, model = initialize(path, result_q)
-        elif task == 'scanning' and f_db is not None:
-            logger.debug('scanning путь: %s', path)
-            scanning(path, f_db, result_q)
-        elif task == 'vector':
-            logger.debug('vector путь: %s', path)
-            vectorization(path, f_db, v_db, model, result_q)
-        elif task == 'request' and model is not None and item.query is not None:
-            logger.debug('request текст: %s', item.query)
-            results = model.request(item.query, v_db)
-            result_q.put(Result({'worker': 'request', 'data': results}, Status.DONE, 100))
+            if task == 'init':
+                logger.debug('initialize путь: %s', path)
+                if f_db is not None and v_db is not None:
+                    f_db.close()
+                    v_db.close()
+                f_db, v_db, model = initialize(path, result_q)
+            elif task == 'scanning' and f_db is not None:
+                logger.debug('scanning путь: %s', path)
+                scanning(path, f_db, result_q)
+            elif task == 'vector':
+                logger.debug('vector путь: %s', path)
+                vectorization(path, f_db, v_db, model, result_q)
+            elif task == 'request' and model is not None and item.query is not None:
+                logger.debug('request текст: %s', item.query)
+                results = model.request(item.query, v_db)
+                result_q.put(Result({'worker': 'request', 'data': results}, Status.DONE, 100))
+        except Exception as err:
+            logger.error('Ошибка worker: %s', err)
+            result_q.put(Result({}, Status.ERROR, 100, text_error=f'{err}'))
 
     if f_db is not None and v_db is not None:
         f_db.close()

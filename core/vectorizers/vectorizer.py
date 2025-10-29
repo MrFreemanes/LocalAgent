@@ -22,7 +22,7 @@ class Vectorizer:
         self.model = model
         self.base_path = base_path
 
-        self.logger.debug('Vectorizer инициализирован, base_pathЖ %s', self.base_path)
+        self.logger.debug('Vectorizer инициализирован, base_path: %s', self.base_path)
 
     def run(self):
         """
