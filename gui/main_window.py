@@ -151,7 +151,7 @@ class MainWindow(BaseWindow):
         self.ui.textEdit_chat.append(f"<b>Запрос:</b> {text}")
         self.ui.lineEdit_massage.clear()
 
-        self.logger.debug('Отправлена задача с текстом text')
+        self.logger.debug('Отправлена задача с текстом %s', text)
 
     def _check_result(self, result: Result):
         """Устанавливает ответ от модели в textEdit_chat."""

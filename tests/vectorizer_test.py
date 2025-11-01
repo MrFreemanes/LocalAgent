@@ -21,7 +21,7 @@ class VectorizerTest(TestCase):
         self.model.embed.return_value = [[-0.0735117495059967, -0.1563340276479721, -0.7277779579162598]]
 
         self.vectorizer = Vectorizer(self.files_db, self.vector_db, self.model, self.base_path)
-        self.vectorizer.logger = Mock()
+        self.vectorizer.logger = MagicMock()
 
     def test_run_total_is_zero(self):
         self.files_db.get_unindexed_files.return_value = []

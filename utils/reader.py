@@ -1,19 +1,13 @@
-from pathlib import Path
 import re
+
+from utils.file_io import read_file
 
 
 def read_file_to_chunks(abs_path: str, chunk_size: int = 1000, overlap: int = 100) -> list[str]:
     """
     Читает текстовый файл по абсолютному пути и возвращает чанки текста.
     """
-    file_path = Path(abs_path)
-    if not file_path.exists():
-        raise FileNotFoundError(f"Файл {file_path} не найден")
-
-    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-        text = f.read()
-
-    text = normalize_text(text)
+    text = normalize_text(read_file(abs_path))
 
     chunks = []
     start = 0

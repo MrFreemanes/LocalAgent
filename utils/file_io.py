@@ -1,6 +1,7 @@
 import json, os
 import logging
 from logging import config
+from pathlib import Path
 
 from utils.paths import path_to_config
 from logs.logger_cfg import cfg
@@ -25,3 +26,12 @@ def load_json(path: str = path_to_config('config.json')) -> dict | None:
             return json.load(f)
     except Exception as err:
         logger.error('Ошибка загрузки файла %s: %s', path, err)
+
+
+def read_file(path: str) -> str | None:
+    file_path = Path(path)
+    if not file_path.exists():
+        raise FileNotFoundError(f"Файл {file_path} не найден")
+
+    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        return f.read()
